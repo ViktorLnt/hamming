@@ -9,3 +9,35 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.number-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.number-group-item,.hamming-group-item {
+  padding-right:10px;
+  padding-left:10px;
+}
+
+.number-group-item:hover {
+  color:red;
+  cursor: pointer;
+}
+
+.mark {
+  fill: #5266d6;
+}
+
+.tick text {
+  fill: #5266d6;
+}
+
+.tick line {
+  stroke: #738ed8;
+}
+
+.input {
+  height: 12vh;
+}

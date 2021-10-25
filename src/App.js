@@ -1,59 +1,27 @@
 import React, {
   useState,
   useContext,
-  createContext,
-  useMemo,
   useEffect,
 } from "react";
 import "./App.css";
 import IconButton from "@mui/material/IconButton";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import Box from "@mui/material/Box";
-import { useTheme, ThemeProvider, createTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { Paper, Grid, TextField, Button } from "@mui/material";
-import Graph from "./Graph.js";
+import Graph from "./barchart_components/Graph.js";
 
-const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
-export default function ToggleColorMode() {
-  const [mode, setMode] = useState("dark");
-  const colorMode = useMemo(
-    () => ({
-      toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === "light" ? "dark" : "light"));
-      },
-    }),
-    []
-  );
-
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: {
-          mode,
-        },
-      }),
-    [mode]
-  );
-
-  return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
-        <App />
-      </ThemeProvider>
-    </ColorModeContext.Provider>
-  );
-}
-
-function App() {
-  const theme = useTheme();
+export default function App({ColorModeContext}) {
   const colorMode = useContext(ColorModeContext);
+  const theme = useTheme();
   const [newNumber, setNewNumber] = useState("");
   const [numbersList, setNumbersList] = useState([]);
   const [distances, setDistances] = useState([]);
   const [inputError, setInputError] = useState(false);
+  const [inputErrorText, setInputErrorText] = useState(" ");
   const [graphData, setGraphData] = useState([]);
 
   useEffect(() => {
@@ -61,22 +29,66 @@ function App() {
       let counter = 0;
       let aString = a.toString();
       let bString = b.toString();
-      for (var i = 0; i < 5; i++) {
-        if (aString[i]!==bString[i]){
+      for (var j = 0; j < 5; j++) {
+        if (aString[j] !== bString[j]) {
           counter++;
         }
       }
       return counter;
     };
-    
+
     let listCopy = [...numbersList];
     let returnValue = [];
-      while (listCopy[1] !== undefined) {
-        returnValue.push(hamming_distance(listCopy[0], listCopy[1]));
-        listCopy.shift();
-      }
+    while (listCopy[1] !== undefined) {
+      returnValue.push(hamming_distance(listCopy[0], listCopy[1]));
+      listCopy.shift();
+    }
     setDistances(returnValue);
+
+    let graphDataLoader = [];
+    for (var i = 0; i < returnValue.length; i++) {
+      graphDataLoader.push({ value: returnValue[i], id: i + 1 });
+    }
+    setGraphData(graphDataLoader);
   }, [numbersList]);
+
+  const helperFunction = () => {
+    setInputError(false);
+    setInputErrorText(" ");
+    setNumbersList((prevList) =>
+          [...prevList, parseInt(newNumber)].sort(function (a, b) {
+            return a - b;
+          })
+        );
+  }
+
+  const helperFunction2 = () => {
+    setInputError(true);
+    setInputErrorText("Min 5 digits");
+  }
+
+  const handleClick = () => {
+    if (numbersList.length<5) {
+      setInputError(false);
+      setInputErrorText(" ");
+      newNumber.length === 5
+      ? helperFunction()
+      : helperFunction2()
+    } else {
+      setInputError(true);
+      setInputErrorText("Max 5. Click a number to delete");
+    }
+    
+    setNewNumber("");
+  };
+
+  const handleDelete = (ArrayItem) => {
+      const index = numbersList.indexOf(ArrayItem);
+      const firstHalf = numbersList.slice(0, index);
+      const secondHalf = numbersList.slice(index+1);
+
+      setNumbersList([...firstHalf, ...secondHalf]);
+  };
 
   return (
     <Paper
@@ -116,8 +128,7 @@ function App() {
             </IconButton>
           </Box>
         </div>
-        {/* INPUT */}
-        <div>
+        <div className="input">
           <TextField
             onChange={(e) => {
               e.target.value = Math.max(0, parseInt(e.target.value))
@@ -126,6 +137,7 @@ function App() {
               setNewNumber(e.target.value);
               if (newNumber.length === 4) {
                 setInputError(false);
+                setInputErrorText(" ");
               }
             }}
             style={{ width: "15%" }}
@@ -134,43 +146,40 @@ function App() {
             size="small"
             value={newNumber}
             error={inputError}
-            helperText={inputError ? "5 digits required" : ""}
+            helperText={inputErrorText}
           />
-          <Button
-            onClick={() => {
-              newNumber.length === 5
-                ? setNumbersList((prevList) =>
-                    [...prevList, parseInt(newNumber)].sort(function (a, b) {
-                      return a - b;
-                    })
-                  )
-                : setInputError(true);
-              setNewNumber("");
-            }}
-            variant="contained"
-            size="large"
-          >
+          <Button onClick={handleClick} variant="contained" size="large" backgroundcolor="#5266d6">
             <ArrowForwardIcon />
           </Button>
         </div>
-        {/* LIST */}
+        {/* LISTS */}
         <div className="list">
           <div>
             Number(s):
-            {numbersList.map((ArrayItem) => (
-              <div key={ArrayItem}>{ArrayItem}</div>
-            ))}
+            <div className="number-group">
+              {numbersList.map((ArrayItem, idx) => (
+                <div onClick={()=>handleDelete(ArrayItem)} className="number-group-item" key={idx}>
+                  {ArrayItem}
+                </div>
+              ))} 
+            </div>
           </div>
           <div>
             Hamming distance(s):
-            {distances &&
-              distances.map((ArrayItem) => (
-                <div key={ArrayItem}>{ArrayItem}</div>
-              ))}
+            <div className="number-group">
+              {distances &&
+                distances.map((ArrayItem, idx) => (
+                  <div className="hamming-group-item" key={idx}>
+                    {ArrayItem}
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
         {/* GRAPH */}
-        {/* <Graph data={graphData}/> */}
+        <div>
+          <Graph data={graphData} />
+        </div>
       </Grid>
     </Paper>
   );

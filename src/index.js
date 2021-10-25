@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import ToggleColorMode from './ToggleColorMode';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ToggleColorMode />
   </React.StrictMode>,
   document.getElementById('root')
 );
