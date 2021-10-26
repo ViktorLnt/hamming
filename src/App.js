@@ -142,6 +142,7 @@ export default function App({ColorModeContext}) {
             }}
             style={{ width: "15%" }}
             type="number"
+            pattern="[0-9]*"
             label="Add Number"
             size="small"
             value={newNumber}
