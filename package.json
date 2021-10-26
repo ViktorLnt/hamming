@@ -1,6 +1,6 @@
 {
-  "name": "hamming",
-  "homepage":"http://richardhamming.gg",
+  "name": "hammingdistance",
+  "homepage":"https://hammingdistance.honlaptest.site",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
